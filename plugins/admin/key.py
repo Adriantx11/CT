@@ -4,7 +4,7 @@ from random import randrange
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 @addCommand('key')
-async def bin(_, m):
+async def bin(client, m):
     try:
         querY = MongoDB().query_user(int(m.from_user.id))
         if querY is None:
