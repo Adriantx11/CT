@@ -86,6 +86,16 @@ async def vbv(client, message):
         bin_text = "• Bin: Error al obtener información\n• Country: N/A\n• Bank: N/A"
 
     fin = time.time()
+    
+    # Agregar log de la actividad
+    MongoDB().add_log(
+        user_id=user_id,
+        action="check",
+        gate="vbv",
+        result="success" if "✅" in chk[0] else "error",
+        details=f"Time: {fin-inicio:0.4f}s, Status: {chk[0]}"
+    )
+    
     texto = f'''<b>・ VBV B3
 
 • Cc: <code>{cc_com}</code>

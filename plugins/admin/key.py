@@ -29,7 +29,7 @@ async def bin(client, m):
     ━━━━━━━━━━━━━━━━━━━━━ 
     • <b>Admin :</b> <a href='tg://user?id={m.from_user.id}'>{m.from_user.first_name}</a> [{querY["role"]}]</b>'''
 
-        MongoDB().save_key(key, int(dias[1]))
+        MongoDB().save_key(key, int(dias[1]), m.from_user.id)
 
         await m.reply(
             text,

@@ -31,6 +31,7 @@ class MongoDB(object):
                 cls._instance.user = cls._instance.db["user"]
                 cls._instance.group = cls._instance.db["group"]
                 cls._instance.key = cls._instance.db["keys"]
+                cls._instance.logs = cls._instance.db["logs"]
                 
                 # Limpiar documentos duplicados antes de crear índices
                 cls._instance._clean_duplicates()
@@ -40,6 +41,8 @@ class MongoDB(object):
                     cls._instance.user.create_index("id", unique=True)
                     cls._instance.group.create_index("id", unique=True)
                     cls._instance.key.create_index("key", unique=True)
+                    cls._instance.logs.create_index([("user_id", 1), ("timestamp", -1)])
+                    cls._instance.logs.create_index([("action", 1), ("timestamp", -1)])
                 except DuplicateKeyError as e:
                     print(f"Advertencia: No se pudieron crear algunos índices únicos: {e}")
                 
@@ -86,6 +89,36 @@ class MongoDB(object):
 
     def insert_user(self, data:dict):
         return self.user.insert_one(data)
+        
+    def add_log(self, user_id, action, gate=None, result="success", details=None):
+        """Agregar un log de actividad"""
+        log_data = {
+            "user_id": user_id,
+            "action": action,
+            "gate": gate,
+            "timestamp": time.time(),
+            "result": result,
+            "details": details
+        }
+        return self.logs.insert_one(log_data)
+        
+    def get_user_logs(self, user_id, limit=50):
+        """Obtener logs de un usuario"""
+        return list(self.logs.find({"user_id": user_id}).sort("timestamp", -1).limit(limit))
+        
+    def get_stats(self, user_id=None):
+        """Obtener estadísticas de uso"""
+        if user_id:
+            # Estadísticas de un usuario específico
+            total_checks = self.logs.count_documents({"user_id": user_id, "action": "check"})
+            total_claims = self.logs.count_documents({"user_id": user_id, "action": "claim"})
+            return {"total_checks": total_checks, "total_claims": total_claims}
+        else:
+            # Estadísticas globales
+            total_users = self.user.count_documents({})
+            total_premium = self.user.count_documents({"plan": "premium"})
+            total_checks = self.logs.count_documents({"action": "check"})
+            return {"total_users": total_users, "total_premium": total_premium, "total_checks": total_checks}
 
     def key_add(self, key, dias):
         return self.key.insert_one({"key":key, "dias":dias})
@@ -96,15 +129,19 @@ class MongoDB(object):
         # Si el usuario ya es premium y la fecha de expiración es futura, sumar los días
         if usuario and usuario.get('plan') == 'premium' and usuario.get('since') and usuario['since'] > ahora.timestamp():
             nueva_fecha = datetime.datetime.fromtimestamp(usuario['since']) + datetime.timedelta(days=dia)
+            dias_usados = usuario.get('premium_days_used', 0) + dia
         else:
             nueva_fecha = ahora + datetime.timedelta(days=dia)
+            dias_usados = dia
         times = nueva_fecha.timestamp()
         self.user.update_one(
             {"id": idw},
             {"$set": {
                 "plan": "premium",
                 "since": times,
-                "antispam": 20
+                "antispam": 20,
+                "premium_days_used": dias_usados,
+                "last_activity": time.time()
             }}
         )
 
@@ -127,10 +164,17 @@ class MongoDB(object):
             {"$inc": {"credits": crdit}}
         )
 
-    def update_group(self, idw, dias):
+    def update_group(self, idw, dias, added_by=None):
         tiempo_futuro = datetime.datetime.now() + datetime.timedelta(days=dias)
         times = tiempo_futuro.timestamp()
-        self.group.insert_one({"id":idw, "dias":times})
+        group_data = {
+            "id": idw,
+            "dias": times,
+            "added_by": added_by,
+            "added_at": time.time(),
+            "status": "active"
+        }
+        self.group.insert_one(group_data)
 
     def key_delete(self, key):
         return self.key.delete_one({"key":key})
@@ -147,8 +191,17 @@ class MongoDB(object):
     def add_role(self, id, role):
         self.user.update_one({"id": id}, {"$set": {"role": role}})
         
-    def save_key(self, key, dias):
-        return self.key.insert_one({"key":key, "dias":dias})
+    def save_key(self, key, dias, created_by=None):
+        key_data = {
+            "key": key,
+            "dias": dias,
+            "created_by": created_by,
+            "created_at": time.time(),
+            "used_by": None,
+            "used_at": None,
+            "status": "active"
+        }
+        return self.key.insert_one(key_data)
         
     def admin(self, id):
         query = self.query_user(id)

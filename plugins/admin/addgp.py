@@ -21,7 +21,7 @@ async def bin(client, m):
     query = MongoDB().query_group(idw)
 
     if query == None: 
-        MongoDB().update_group(idw,dias)
+        MongoDB().update_group(idw,dias, m.from_user.id)
         await m.reply('Id añadido con exito., ahora puede usar el chat.✅')
         texto= f'''<b>Ha aprovado un chat
 

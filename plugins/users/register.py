@@ -1,5 +1,6 @@
 from srca.configs import addCommand,Client
 from db.mongo_client import MongoDB
+import time
 
 @addCommand('register')
 async def start(_,m):
@@ -8,7 +9,20 @@ async def start(_,m):
     #    if  querY['role'] == 'baneado': return await m.reply('User baneado')
 
         if  querY == None:
-            data = {'id': int(m.from_user.id),'plan': 'free','role': 'user','credits': 0,'antispam': 40,'since': None}
+            data = {
+                'id': int(m.from_user.id),
+                'username': m.from_user.username,
+                'first_name': m.from_user.first_name,
+                'plan': 'free',
+                'role': 'user',
+                'credits': 0,
+                'antispam': 40,
+                'since': None,
+                'registered_at': time.time(),
+                'last_activity': time.time(),
+                'total_checks': 0,
+                'premium_days_used': 0
+            }
             MongoDB().insert_user(data)
 
             texto= f'''<b>New User 
