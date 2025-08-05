@@ -103,24 +103,32 @@ async def au(client, message):
 def get_proxy():
     try:
         with open('srca/proxy.txt', 'r') as file:
-            proxies = [line.strip() for line in file if line.strip()]
+            # Filtrar líneas válidas (no comentarios, no vacías, que contengan @)
+            proxies = []
+            for line in file:
+                line = line.strip()
+                if line and not line.startswith('#') and '@' in line:
+                    proxies.append(line)
+            
         if not proxies:
-            raise ValueError("El archivo proxy.txt está vacío o no contiene proxies válidos.")
+            print("No se encontraron proxies válidos en proxy.txt")
+            return None
+            
         proxy_str = random.choice(proxies)
+        user_pass, ip_port = proxy_str.split('@')
+        username, password = user_pass.split('://')[1].split(':')
+        server = f"http://{ip_port}"
+        proxy = {
+            "server": server,
+            "username": username,
+            "password": password
+        }
+        print(f"Usando proxy: {proxy_str}")
+        return proxy
+        
     except FileNotFoundError:
         print("Error: No se encontró el archivo proxy.txt")
         return None
     except Exception as e:
-        print(f"Error al leer proxy.txt: {str(e)}")
+        print(f"Error al procesar proxy: {str(e)}")
         return None
-
-    user_pass, ip_port = proxy_str.split('@')
-    username, password = user_pass.split('://')[1].split(':')
-    server = f"http://{ip_port}"
-    proxy = {
-        "server": server,
-        "username": username,
-        "password": password
-    }
-    print(f"Usando proxy: {proxy_str}")
-    return proxy
