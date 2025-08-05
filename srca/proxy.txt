@@ -1,0 +1,14 @@
+# Proxy actual del sistema
+http://pc1gRJL5rD-res-any:PC_0rJ3qKNZ5uvWHZudy@proxy-us.proxy-cheap.com:5959
+
+# Nuevos proxies agregados
+http://jmwliooh-5:x7698x2hzf1d@23.95.150.145:10004
+http://jmwliooh-2:x7698x2hzf1d@198.23.239.134:10001
+http://jmwliooh-10:x7698x2hzf1d@45.38.107.97:10009
+http://jmwliooh-7:x7698x2hzf1d@207.244.217.165:10006
+http://jmwliooh-6:x7698x2hzf1d@107.172.163.27:10005
+http://jmwliooh-4:x7698x2hzf1d@104.222.161.211:10003
+http://jmwliooh-8:x7698x2hzf1d@64.137.96.74:10007
+http://jmwliooh-1:x7698x2hzf1d@216.10.27.159:10000
+http://jmwliooh-9:x7698x2hzf1d@136.0.207.84:10008
+http://jmwliooh-3:x7698x2hzf1d@142.147.128.93:10002 
