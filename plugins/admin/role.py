@@ -5,21 +5,21 @@ from random import randrange
 
 
 @addCommand('role')
-def bin(_,m):
+async def bin(client, m):
     querY = MongoDB().query_user(int(m.from_user.id))
-    if  querY == None: return m.reply('Usar el comando $register para el registro.')
+    if  querY == None: return await m.reply('Usar el comando $register para el registro.')
     
     if MongoDB().owner(int(m.from_user.id)) == False: return ...
     
     data = m.text.split(' ')
     
-    if len(data) < 3: return m.reply('ingrese datos correctos <code>$role id antispam</code>')
+    if len(data) < 3: return await m.reply('ingrese datos correctos <code>$role id antispam</code>')
 
     idw = int(data[1])
     dias = str(data[2])
     
     MongoDB().add_role(idw,dias)
-    m.reply(f'Ahora el usuario {idw}, cumple el rol: {dias}')
+    await m.reply(f'Ahora el usuario {idw}, cumple el rol: {dias}')
 
     texto= f'''<b>Role usado
 
@@ -32,4 +32,4 @@ Ha editado los Rol
 • <b>rol: </b> <code>{dias}</code>
 ━━━━━━━━━━
 </b>'''
-    Client.send_message(_,chat_id=-1002726521405 ,text=texto)
+    await client.send_message(chat_id=-1002726521405, text=texto)

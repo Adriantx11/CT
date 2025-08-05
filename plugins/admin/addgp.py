@@ -5,15 +5,15 @@ from random import randrange
 
 
 @addCommand('addg')
-def bin(_,m):
+async def bin(client, m):
     querY = MongoDB().query_user(int(m.from_user.id))
-    if  querY == None: return m.reply('Usar el comando $register para el registro.')
+    if  querY == None: return await m.reply('Usar el comando $register para el registro.')
     
     if MongoDB().admin(int(m.from_user.id)) == False: return ...
     
     data = m.text.split(' ')
     
-    if len(data) < 3: return m.reply('ingrese datos correctos <code>$addg id dias</code>')
+    if len(data) < 3: return await m.reply('ingrese datos correctos <code>$addg id dias</code>')
 
     idw = int(data[1])
     dias = int(data[2])
@@ -22,7 +22,7 @@ def bin(_,m):
 
     if query == None: 
         MongoDB().update_group(idw,dias)
-        m.reply('Id añadido con exito., ahora puede usar el chat.✅')
+        await m.reply('Id añadido con exito., ahora puede usar el chat.✅')
         texto= f'''<b>Ha aprovado un chat
 
 Name: {m.from_user.first_name}
@@ -34,9 +34,9 @@ Ha aprovado Un chat.
 • <b>Dias Generados :</b> <code>{dias}</code>
 ━━━━━━━━━━
 </b>'''
-        Client.send_message(_,chat_id=-1002726521405 ,text=texto)
+        await client.send_message(chat_id=-1002726521405, text=texto)
         
-    else: return m.reply('Ya tiene acceso al chat privado')
+    else: return await m.reply('Ya tiene acceso al chat privado')
 
 
 

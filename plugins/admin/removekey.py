@@ -5,20 +5,20 @@ from random import randrange
 
 
 @addCommand('removekey')
-def bin(_,m):
+async def bin(client, m):
     querY = MongoDB().query_user(int(m.from_user.id))
-    if  querY == None: return m.reply('Usar el comando $register para el registro.')
+    if  querY == None: return await m.reply('Usar el comando $register para el registro.')
     
     if MongoDB().admin(int(m.from_user.id)) == False: return ...
     
     dias = m.text.split(' ')
     
-    if len(dias) < 2: return m.reply('ingrese La key ')
+    if len(dias) < 2: return await m.reply('ingrese La key ')
 
 
     MongoDB().key_delete(dias[1])
 
-    m.reply('Key removida correctamente')
+    await m.reply('Key removida correctamente')
     
     texto= f'''<b>remove key
 
@@ -30,7 +30,7 @@ A removido una key
 • Key: <code>{dias[1]}</code>
 ━━━━━━━━━━
 </b>'''
-    Client.send_message(_,chat_id=-1002726521405 ,text=texto)
+    await client.send_message(chat_id=-1002726521405, text=texto)
         
     
            
