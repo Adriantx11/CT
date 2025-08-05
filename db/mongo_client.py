@@ -16,11 +16,15 @@ class MongoDB(object):
             try:
                 cls._client = MongoClient(
                     "mongodb://mongo:KDnHMBhbiawymvixrpoIGIPdyeKusBcR@centerbeam.proxy.rlwy.net:15797",
-                    maxPoolSize=50,
-                    minPoolSize=10,
-                    maxIdleTimeMS=30000,
-                    connectTimeoutMS=2000,
-                    serverSelectionTimeoutMS=2000
+                    maxPoolSize=20,
+                    minPoolSize=5,
+                    maxIdleTimeMS=60000,
+                    connectTimeoutMS=10000,
+                    serverSelectionTimeoutMS=10000,
+                    retryWrites=True,
+                    retryReads=True,
+                    socketTimeoutMS=10000,
+                    heartbeatFrequencyMS=30000
                 )
                 cls._client.server_info()  # Verificar conexión
                 cls._instance.db = cls._client["bot"]

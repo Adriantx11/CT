@@ -19,7 +19,7 @@ async def bin(client, m):
             return await m.reply('ingrese los dias.')
 
         keys1 = randrange(10000000)
-        key = f'𝘾𝙏_𝘾𝙃𝙆-{keys1}'
+        key = f'𝘾𝙏𝘾𝙃𝙆-{keys1}'
 
         text = f'''<b>
     [✅] 𝗞𝗲𝘆 𝗚𝗲𝗻𝗲𝗿𝗮𝗱𝗮
