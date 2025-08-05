@@ -1,0 +1,43 @@
+# Archivos de configuración sensibles
+*.session
+*.session-journal
+config.ini
+.env
+
+# Logs
+*.log
+debug_callbacks.txt
+
+# Archivos temporales
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Base de datos
+*.db
+*.sqlite
+
+# Archivos de proxy
+proxy.txt
+
+# Archivos de configuración local
+local_config.py 
