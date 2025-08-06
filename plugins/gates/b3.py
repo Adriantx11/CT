@@ -64,14 +64,23 @@ async def b3(client, message):
 
     import requests
     proxy = get_proxy()
-    if proxy:
-        proxies = {
-            "http": f"http://{proxy['username']}:{proxy['password']}@{proxy['server'].replace('http://', '')}",
-            "https": f"http://{proxy['username']}:{proxy['password']}@{proxy['server'].replace('http://', '')}"
-        }
-        req = await asyncio.to_thread(requests.get, f'https://binlist.io/lookup/{ccs[0][:6]}', proxies=proxies)
-    else:
-        req = await asyncio.to_thread(requests.get, f'https://binlist.io/lookup/{ccs[0][:6]}')
+    
+    # Manejo mejorado de errores para binlist.io
+    try:
+        if proxy:
+            proxies = {
+                "http": f"http://{proxy['username']}:{proxy['password']}@{proxy['server'].replace('http://', '')}",
+                "https": f"http://{proxy['username']}:{proxy['password']}@{proxy['server'].replace('http://', '')}"
+            }
+            req = await asyncio.to_thread(requests.get, f'https://binlist.io/lookup/{ccs[0][:6]}', proxies=proxies, timeout=15)
+        else:
+            req = await asyncio.to_thread(requests.get, f'https://binlist.io/lookup/{ccs[0][:6]}', timeout=15)
+        
+        bin_info = req.json()
+        bin_text = f"• Bin: {bin_info.get('scheme', 'N/A')} {bin_info.get('type', 'N/A')} {bin_info.get('category', 'N/A')}\n• Country: {bin_info.get('country', {}).get('name', 'N/A')} [{bin_info.get('country', {}).get('emoji', '')}]\n• Bank: {bin_info.get('bank', {}).get('name', 'N/A')}"
+    except Exception as e:
+        print(f"Error al obtener información del BIN: {e}")
+        bin_text = "• Bin: Error al obtener información\n• Country: N/A\n• Bank: N/A"
 
     if ccs == '<b>ingrese la ccs.</b>':
         return await message.reply(ccs)
@@ -91,9 +100,7 @@ async def b3(client, message):
 • Status: {chk[0]}
 • Response: <code>{chk[1]}</code>
 
-• Bin: {req.json()['scheme']} {req.json()['type']} {req.json()['category']}
-• Country:{req.json()['country']['name']} [{req.json()['country']['emoji']}]
-• Bank: {req.json()['bank']['name']} 
+{bin_text}
 
 • Pxs: Live ✅
 • Time: <code>{fin-inicio:0.4f}'s</code>
