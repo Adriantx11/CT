@@ -39,8 +39,27 @@ async def broadcast(client, message):
         usuarios = MongoDB().db.users.find({}, {"user_id": 1})
         usuarios_list = list(usuarios)
         
+        # Información de diagnóstico
+        total_usuarios_db = MongoDB().db.users.count_documents({})
+        print(f"Total de usuarios en DB: {total_usuarios_db}")
+        print(f"Usuarios encontrados: {len(usuarios_list)}")
+        
         if not usuarios_list:
-            await confirm_msg.edit_text('❌ No hay usuarios registrados en la base de datos.')
+            await confirm_msg.edit_text(f'''❌ **No hay usuarios registrados en la base de datos.**
+
+**Diagnóstico:**
+• Total de usuarios en DB: `{total_usuarios_db}`
+• Usuarios encontrados: `{len(usuarios_list)}`
+
+**Posibles causas:**
+• La base de datos está vacía
+• Los usuarios no se han registrado con `$register`
+• Problema de conexión con MongoDB
+
+**Solución:**
+• Verifica que haya usuarios registrados
+• Asegúrate de que usen el comando `$register`
+• Revisa la conexión a MongoDB''')
             return
         
         total_usuarios = len(usuarios_list)
@@ -132,4 +151,65 @@ async def broadcast(client, message):
             gate="admin",
             result="error",
             details=f"Error: {str(e)}"
-        ) 
+        )
+
+@addCommand(['dbstatus', 'dbinfo', 'diagnostico'])
+async def db_status(client, message):
+    """
+    Comando para verificar el estado de la base de datos y usuarios registrados.
+    Solo disponible para administradores.
+    """
+    user_id = message.from_user.id
+    
+    # Verificar si el usuario está registrado
+    querY = MongoDB().query_user(int(user_id))
+    if querY is None:
+        return await message.reply('Usar el comando $register para el registro.')
+    
+    # Verificar si el usuario es admin
+    if not MongoDB().admin(user_id):
+        return await message.reply('❌ No tienes permisos de administrador para usar este comando.')
+    
+    try:
+        # Obtener estadísticas de la base de datos
+        total_usuarios = MongoDB().db.users.count_documents({})
+        usuarios_con_user_id = MongoDB().db.users.count_documents({"user_id": {"$exists": True}})
+        usuarios_sin_user_id = total_usuarios - usuarios_con_user_id
+        
+        # Obtener algunos ejemplos de usuarios
+        usuarios_ejemplo = list(MongoDB().db.users.find({}, {"user_id": 1, "username": 1, "first_name": 1}).limit(5))
+        
+        # Información de diagnóstico
+        status_texto = f'''📊 **Estado de la Base de Datos**
+
+**Estadísticas:**
+• **Total de usuarios:** `{total_usuarios}`
+• **Con user_id:** `{usuarios_con_user_id}`
+• **Sin user_id:** `{usuarios_sin_user_id}`
+
+**Ejemplos de usuarios:**
+'''
+        
+        if usuarios_ejemplo:
+            for i, usuario in enumerate(usuarios_ejemplo, 1):
+                user_id = usuario.get("user_id", "N/A")
+                username = usuario.get("username", "N/A")
+                first_name = usuario.get("first_name", "N/A")
+                status_texto += f"• **{i}.** ID: `{user_id}` | @{username} | {first_name}\n"
+        else:
+            status_texto += "• No hay usuarios registrados\n"
+        
+        status_texto += f'''
+
+**Conectividad:**
+• **MongoDB:** ✅ Conectado
+• **Colección users:** ✅ Disponible
+
+**Recomendaciones:**
+• Si hay usuarios sin user_id, pueden tener problemas con el broadcast
+• Asegúrate de que los usuarios usen `$register` para registrarse'''
+        
+        await message.reply(status_texto)
+        
+    except Exception as e:
+        await message.reply(f'❌ **Error al verificar la base de datos:**\n\n`{str(e)}`') 
